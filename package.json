@@ -1,0 +1,69 @@
+{
+  "name": "@rlabs-inc/theme-generator",
+  "version": "0.1.0",
+  "description": "Transform 3D OKLCH color clouds into complete themes for 10 targets via constraint-based extraction",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "bin": {
+    "sacred-colors": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "cli": "bun run src/cli.ts"
+  },
+  "peerDependencies": {
+    "@rlabs-inc/color-generator": ">=0.1.0",
+    "culori": "^4.0.2"
+  },
+  "devDependencies": {
+    "@rlabs-inc/color-generator": "workspace:*",
+    "@types/culori": "^4.0.1",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  },
+  "keywords": [
+    "color",
+    "theme",
+    "sacred-geometry",
+    "oklch",
+    "vscode",
+    "zed",
+    "ghostty",
+    "warp",
+    "wezterm",
+    "helix",
+    "vim",
+    "neovim",
+    "shadcn",
+    "tailwind"
+  ],
+  "author": "RLabs Inc",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RLabs-Inc/color-generator"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.0.1",
+    "picocolors": "^1.1.1"
+  }
+}
