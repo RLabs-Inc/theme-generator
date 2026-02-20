@@ -63,6 +63,150 @@ function labeledHex(hex: string, name: string, width = 10): string {
   return `${swatch(hex)} ${name.padEnd(width)} ${color.dim(hex)}`;
 }
 
+// ── ANSI Width Helpers ──────────────────────────────────────────────────────
+
+/** Strip ANSI escape codes for visible width measurement */
+function stripAnsi(str: string): string {
+  return str.replace(/\x1b\[[0-9;]*m/g, '');
+}
+
+/** Pad string to target visible width (ignoring ANSI codes) */
+function padVisible(str: string, width: number): string {
+  const visible = stripAnsi(str).length;
+  return str + ' '.repeat(Math.max(0, width - visible));
+}
+
+/** Center a string within a given width */
+function centerPad(s: string, width: number): string {
+  const pad = Math.max(0, width - s.length);
+  const left = Math.floor(pad / 2);
+  return ' '.repeat(left) + s + ' '.repeat(pad - left);
+}
+
+// ── Neofetch-Style Terminal Preview ─────────────────────────────────────────
+
+const ART_WIDTH = 32;
+
+// Sacred geometry mandala — concentric rings evoking the Seed of Life
+const SACRED_ART_RAW: string[] = [
+  '',
+  '\u2588\u2588',
+  '\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588',
+  '\u2588\u2588\u2588\u2588      \u2588\u2588\u2588\u2588',
+  '\u2588\u2588\u2588\u2588  \u2588\u2588\u2588\u2588\u2588\u2588  \u2588\u2588\u2588\u2588',
+  '\u2588\u2588\u2588\u2588  \u2588\u2588\u2588\u2588  \u2588\u2588\u2588\u2588  \u2588\u2588\u2588\u2588',
+  '\u2588\u2588\u2588\u2588  \u2588\u2588  \u2588\u2588\u2588\u2588  \u2588\u2588  \u2588\u2588\u2588\u2588',
+  '\u2588\u2588\u2588\u2588 \u2588\u2588  \u2588\u2588  \u2588\u2588  \u2588\u2588 \u2588\u2588\u2588\u2588',
+  '\u2588\u2588\u2588\u2588 \u2588\u2588  \u2588\u2588  \u2588\u2588  \u2588\u2588 \u2588\u2588\u2588\u2588',
+  '\u2588\u2588\u2588\u2588  \u2588\u2588  \u2588\u2588\u2588\u2588  \u2588\u2588  \u2588\u2588\u2588\u2588',
+  '\u2588\u2588\u2588\u2588  \u2588\u2588\u2588\u2588  \u2588\u2588\u2588\u2588  \u2588\u2588\u2588\u2588',
+  '\u2588\u2588\u2588\u2588  \u2588\u2588\u2588\u2588\u2588\u2588  \u2588\u2588\u2588\u2588',
+  '\u2588\u2588\u2588\u2588      \u2588\u2588\u2588\u2588',
+  '\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588',
+  '\u2588\u2588',
+  '',
+  'sacred  colors',
+  '',
+];
+
+const SACRED_ART = SACRED_ART_RAW.map(l => centerPad(l, ART_WIDTH));
+
+// 6 color zones (3 lines each) cycling through chromatic ANSI colors
+const ART_ZONE_ROLES: string[] = [
+  'ansiRed',     'ansiRed',     'ansiRed',
+  'ansiYellow',  'ansiYellow',  'ansiYellow',
+  'ansiGreen',   'ansiGreen',   'ansiGreen',
+  'ansiCyan',    'ansiCyan',    'ansiCyan',
+  'ansiBlue',    'ansiBlue',    'ansiBlue',
+  'ansiMagenta', 'ac1',         'ansiMagenta',
+];
+
+const TERMINAL_TARGETS = new Set(['warp', 'ghostty', 'wezterm']);
+
+function buildInfoLines(
+  palette: ThemePalette,
+  targetLabel: string,
+  patternName: string,
+  hue: number,
+  mode: ThemeMode,
+): string[] {
+  const h = (role: string) => palette.hex(role);
+  const lines: string[] = [];
+
+  // Header
+  lines.push(`${fgHex(h('ac1'))}sacred${RST}@${fgHex(h('ac2'))}colors${RST}`);
+  lines.push(`${fgHex(h('border'))}${'\u2500'.repeat(24)}${RST}`);
+
+  // Key-value info
+  const kv = (key: string, val: string) =>
+    `${fgHex(h('ac2'))}${key}${RST} ${fgHex(h('fg1'))}${val}${RST}`;
+  lines.push(kv('Pattern:', patternName));
+  lines.push(kv('Hue:    ', `${hue}\u00B0`));
+  lines.push(kv('Mode:   ', mode));
+  lines.push(kv('Target: ', targetLabel));
+
+  lines.push('');
+
+  // Normal ANSI
+  const ansiNames = ['Black', 'Red', 'Green', 'Yellow', 'Blue', 'Magenta', 'Cyan', 'White'];
+  lines.push(ansiNames.map(n => swatch(h(`ansi${n}`))).join(' '));
+  lines.push(ansiNames.map(n => swatch(h(`ansiBright${n}`))).join(' '));
+
+  lines.push('');
+
+  // UI swatches
+  lines.push(
+    `${swatch(h('bg1'))} ${fgHex(h('fg2'))}bg${RST}  ` +
+    `${swatch(h('fg1'))} ${fgHex(h('fg2'))}fg${RST}  ` +
+    `${swatch(h('cursor'))} ${fgHex(h('fg2'))}cur${RST}  ` +
+    `${swatch(h('border'))} ${fgHex(h('fg2'))}brd${RST}`,
+  );
+
+  // Accents & Status
+  lines.push(
+    `${swatch(h('ac1'))} ${fgHex(h('ac1'))}ac1${RST} ` +
+    `${swatch(h('ac2'))} ${fgHex(h('ac2'))}ac2${RST} ` +
+    `${swatch(h('info'))} ${fgHex(h('info'))}inf${RST} ` +
+    `${swatch(h('error'))} ${fgHex(h('error'))}err${RST}`,
+  );
+  lines.push(
+    `${swatch(h('warning'))} ${fgHex(h('warning'))}wrn${RST} ` +
+    `${swatch(h('success'))} ${fgHex(h('success'))}suc${RST} ` +
+    `${swatch(h('selectionBg'))} ${fgHex(h('selectionBg'))}sel${RST} ` +
+    `${swatch(h('fg2'))} ${fgHex(h('fg2'))}fg2${RST}`,
+  );
+
+  lines.push('');
+
+  // Pad/trim to exactly 18 lines
+  while (lines.length < SACRED_ART.length) lines.push('');
+
+  return lines;
+}
+
+function renderTerminalPreview(
+  palette: ThemePalette,
+  targetLabel: string,
+  patternName: string,
+  hue: number,
+  mode: ThemeMode,
+): string {
+  const h = (role: string) => palette.hex(role);
+
+  // Color each art line by zone
+  const coloredArt = SACRED_ART.map((line, i) => {
+    const role = ART_ZONE_ROLES[i] || 'fg1';
+    return `${fgHex(h(role))}${line}${RST}`;
+  });
+
+  const infoLines = buildInfoLines(palette, targetLabel, patternName, hue, mode);
+
+  // Merge side by side: art (32 visible chars) + gap + info
+  return coloredArt.map((art, i) => {
+    return padVisible(art, ART_WIDTH) + '   ' + (infoLines[i] || '');
+  }).join('\n');
+}
+
 // ── Preview Renderers ────────────────────────────────────────────────────────
 
 /** Filter out empty strings from array */
@@ -363,8 +507,14 @@ async function main() {
     // Show preview for each target
     for (const target of selectedTargets) {
       const palette = palettes.get(target.name)!;
-      const preview = renderPalette(palette, target.label);
-      p.note(preview, target.label);
+      if (TERMINAL_TARGETS.has(target.name)) {
+        const preview = renderTerminalPreview(
+          palette, target.label, currentPattern, currentHue, currentMode,
+        );
+        p.note(preview, target.label);
+      } else {
+        p.note(renderPalette(palette, target.label), target.label);
+      }
     }
 
     const action = await p.select({
