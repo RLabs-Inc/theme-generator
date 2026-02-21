@@ -263,12 +263,20 @@ describe('constraints — buildAnsiRoles', () => {
     expect(roles).toHaveLength(8);
   });
 
-  test('constrained ansiRed has wrapping hue range', () => {
+  test('constrained ansiRed has OKLCH-correct hue range (15-55)', () => {
     const roles = buildAnsiRolesConstrained();
     const red = roles.find((r) => r.name === 'ansiRed')!;
     expect(red.dark.h).toBeDefined();
-    expect(red.dark.h![0]).toBe(350);
-    expect(red.dark.h![1]).toBe(30);
+    expect(red.dark.h![0]).toBe(15);
+    expect(red.dark.h![1]).toBe(55);
+  });
+
+  test('constrained ansiMagenta has wrapping hue range (280-15)', () => {
+    const roles = buildAnsiRolesConstrained();
+    const mag = roles.find((r) => r.name === 'ansiMagenta')!;
+    expect(mag.dark.h).toBeDefined();
+    // Wraps: covers indigo (302°) → purple (328°) → pink (352°) → pink (7°)
+    expect(mag.dark.h![0]).toBeGreaterThan(mag.dark.h![1]); // min > max = wrapping
   });
 
   test('constrained ansiBlack/ansiWhite have lightness constraints (no hue)', () => {
@@ -277,8 +285,8 @@ describe('constraints — buildAnsiRoles', () => {
     const white = roles.find((r) => r.name === 'ansiWhite')!;
     expect(black.dark.h).toBeUndefined();
     expect(white.dark.h).toBeUndefined();
-    expect(black.dark.l[1]).toBeLessThan(0.2); // Dark end
-    expect(white.dark.l[0]).toBeGreaterThan(0.8); // Light end
+    expect(black.dark.l[1]).toBeLessThanOrEqual(0.30); // Visible gray range
+    expect(white.dark.l[0]).toBeGreaterThan(0.8);      // Luminous end
   });
 
   test('all ANSI roles have priority 45', () => {
@@ -299,10 +307,19 @@ describe('constraints — ANSI_HUE_RANGES', () => {
     expect(ANSI_HUE_RANGES.ansiWhite).toBeNull();
   });
 
-  test('colored ANSI have defined ranges', () => {
-    expect(ANSI_HUE_RANGES.ansiRed).toEqual([350, 30]);
-    expect(ANSI_HUE_RANGES.ansiGreen).toEqual([90, 160]);
-    expect(ANSI_HUE_RANGES.ansiBlue).toEqual([200, 270]);
+  test('colored ANSI have OKLCH-correct ranges', () => {
+    // Red: dark red (29°) → red-orange, NOT wrapping into pink
+    expect(ANSI_HUE_RANGES.ansiRed).toEqual([15, 55]);
+    // Green: chartreuse → lime → spring green
+    expect(ANSI_HUE_RANGES.ansiGreen).toEqual([120, 170]);
+    // Yellow: includes orange range (53°) through yellow (110°)
+    expect(ANSI_HUE_RANGES.ansiYellow).toEqual([55, 120]);
+    // Blue: dodger blue → pure blue → blue-indigo
+    expect(ANSI_HUE_RANGES.ansiBlue).toEqual([230, 280]);
+    // Cyan: teal → cyan → blue-cyan
+    expect(ANSI_HUE_RANGES.ansiCyan).toEqual([170, 230]);
+    // Magenta: wraps — indigo → purple → magenta → pink on both sides
+    expect(ANSI_HUE_RANGES.ansiMagenta).toEqual([280, 15]);
   });
 });
 

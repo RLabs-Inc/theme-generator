@@ -13,17 +13,30 @@ import type {
 } from './types.js';
 
 // ── ANSI Hue Ranges (Constrained Mode) ─────────────────────────────────────
+//
+// OKLCH hues are NOT the same as HSL!  Reference points (from culori):
+//
+//   ~7°   pink (#ffc0cb)         ~195° cyan (#00ffff)
+//   ~29°  red (#ff0000)          ~253° dodger blue (#1e90ff)
+//   ~53°  orange (#ff8000)       ~264° blue (#0000ff)
+//   ~95°  gold (#ffd700)         ~302° indigo (#4b0082)
+//   ~110° yellow (#ffff00)       ~328° magenta/purple (#ff00ff)
+//   ~142° lime/green (#00ff00)   ~352° hot pink (#ff69b4)
+//
+// Ranges cover 0-360° with no gaps:
+//   0–15 magenta(wrap) | 15–55 red | 55–120 yellow | 120–170 green
+//   170–230 cyan | 230–280 blue | 280–360 magenta(wrap)
 
 /** Hue ranges for constrained ANSI mode. Wrapping ranges use min > max. */
 export const ANSI_HUE_RANGES: Record<string, [number, number] | null> = {
-  ansiBlack: null,    // By lightness (dark end)
-  ansiRed: [350, 30], // Wraps around 0
-  ansiGreen: [90, 160],
-  ansiYellow: [50, 100],
-  ansiBlue: [200, 270],
-  ansiMagenta: [280, 340],
-  ansiCyan: [160, 200],
-  ansiWhite: null,    // By lightness (light end)
+  ansiBlack: null,      // By lightness only — visible grays, all hues
+  ansiRed: [15, 55],    // Dark red (29°) → red → red-orange (53°)
+  ansiGreen: [120, 170],// Chartreuse (136°) → lime (142°) → spring green (151°)
+  ansiYellow: [55, 120],// Orange (53°) → gold (95°) → yellow (110°)
+  ansiBlue: [230, 280], // Dodger blue (253°) → pure blue (264°) → blue-indigo
+  ansiMagenta: [280, 15],// Indigo (302°) → purple (328°) → magenta → hot pink (352°) → pink (7°) — wraps!
+  ansiCyan: [170, 230], // Teal (195°) → cyan → blue-cyan
+  ansiWhite: null,      // By lightness only — all hues, very low chroma
 };
 
 // ── Role Definitions ────────────────────────────────────────────────────────
@@ -32,51 +45,51 @@ export const ANSI_HUE_RANGES: Record<string, [number, number] | null> = {
 export const UI_ROLES: RoleDefinition[] = [
   {
     name: 'bg1', priority: 100,
-    // RLabs uses [0, 35%] dark / [93, 100%] light — allows midrange-dark backgrounds
-    dark:  { l: [0, 0.35], c: [0, 0.04] },
+    // RLabs uses [0, 17%] dark / [93, 100%] light — allows darker backgrounds
+    dark: { l: [0, 0.17], c: [0, 0.04] },
     light: { l: [0.93, 1.0], c: [0, 0.04] },
   },
   {
     name: 'bg2', priority: 95,
-    dark:  { l: [0, 0.25], c: [0, 0.05] },
+    dark: { l: [0, 0.25], c: [0, 0.05] },
     light: { l: [0.88, 1.0], c: [0, 0.05] },
   },
   {
     name: 'bg3', priority: 90,
-    dark:  { l: [0, 0.30], c: [0, 0.03] },
+    dark: { l: [0, 0.30], c: [0, 0.03] },
     light: { l: [0.90, 1.0], c: [0, 0.03] },
   },
   {
     name: 'fg1', priority: 98,
     // RLabs uses [97, 100%] dark / [0, 15%] light — near-white in dark, near-black in light
-    dark:  { l: [0.97, 1.0], c: [0, 0.10] },
+    dark: { l: [0.97, 1.0], c: [0, 0.10] },
     light: { l: [0, 0.15], c: [0, 0.10] },
   },
   {
     name: 'fg2', priority: 85,
     // RLabs uses [95, 100%] dark / [0, 30%] light — slightly dimmer than fg1
-    dark:  { l: [0.95, 1.0], c: [0, 0.15] },
+    dark: { l: [0.95, 1.0], c: [0, 0.15] },
     light: { l: [0, 0.30], c: [0, 0.15] },
   },
   {
     name: 'fg3', priority: 80,
     // FG3 is inverted: near-bg in both modes (disabled/placeholder text)
-    dark:  { l: [0, 0.25], c: [0, 0.15] },
+    dark: { l: [0, 0.25], c: [0, 0.15] },
     light: { l: [0.88, 1.0], c: [0, 0.15] },
   },
   {
     name: 'ac1', priority: 70,
-    dark:  { l: [0, 1.0], c: [0, 0.40] },
+    dark: { l: [0, 1.0], c: [0, 0.40] },
     light: { l: [0, 1.0], c: [0, 0.40] },
   },
   {
     name: 'ac2', priority: 65,
-    dark:  { l: [0, 1.0], c: [0, 0.40] },
+    dark: { l: [0, 1.0], c: [0, 0.40] },
     light: { l: [0, 1.0], c: [0, 0.40] },
   },
   {
     name: 'border', priority: 50,
-    dark:  { l: [0, 0.40], c: [0, 0.10] },
+    dark: { l: [0, 0.40], c: [0, 0.10] },
     light: { l: [0.80, 1.0], c: [0, 0.10] },
   },
 ];
@@ -85,22 +98,22 @@ export const UI_ROLES: RoleDefinition[] = [
 export const STATUS_ROLES: RoleDefinition[] = [
   {
     name: 'info', priority: 60,
-    dark:  { l: [0.20, 1.0], c: [0.10, 0.40], h: [233, 270] },
+    dark: { l: [0.20, 1.0], c: [0.10, 0.40], h: [233, 270] },
     light: { l: [0, 1.0], c: [0.10, 0.40], h: [233, 270] },
   },
   {
     name: 'error', priority: 60,
-    dark:  { l: [0.20, 1.0], c: [0.10, 0.40], h: [24, 32] },
+    dark: { l: [0.20, 1.0], c: [0.10, 0.40], h: [24, 32] },
     light: { l: [0, 1.0], c: [0.10, 0.40], h: [24, 32] },
   },
   {
     name: 'warning', priority: 60,
-    dark:  { l: [0.80, 0.95], c: [0.10, 0.40], h: [33, 100] },
+    dark: { l: [0.80, 0.95], c: [0.10, 0.40], h: [33, 100] },
     light: { l: [0, 1.0], c: [0.10, 0.40], h: [33, 100] },
   },
   {
     name: 'success', priority: 60,
-    dark:  { l: [0.20, 1.0], c: [0.10, 0.40], h: [120, 170] },
+    dark: { l: [0.20, 1.0], c: [0.10, 0.40], h: [120, 170] },
     light: { l: [0, 1.0], c: [0.10, 0.40], h: [120, 170] },
   },
 ];
@@ -129,42 +142,42 @@ export const SYNTAX_ROLE_NAMES = [
  */
 export const SYNTAX_HUE_GROUPS: Partial<Record<typeof SYNTAX_ROLE_NAMES[number], string>> = {
   // Function family — AC1 hue in RLabs
-  function:     'function',
+  function: 'function',
   functionCall: 'function',
   // Method family — distinct from function
-  method:       'method',
-  methodCall:   'method',
+  method: 'method',
+  methodCall: 'method',
   // Variable family
-  variable:            'variable',
-  variableReadonly:    'variable',
+  variable: 'variable',
+  variableReadonly: 'variable',
   variableDeclaration: 'variable',
   // Property family — shares hue with variable in "few" mode, distinct otherwise
-  property:            'property',
+  property: 'property',
   propertyDeclaration: 'property',
-  variableProperty:    'property',
+  variableProperty: 'property',
   // Support family
-  support:         'support',
+  support: 'support',
   supportFunction: 'support',
-  supportMethod:   'support',
+  supportMethod: 'support',
   supportVariable: 'support',
   supportProperty: 'support',
   // Type family
-  type:          'type',
+  type: 'type',
   typeParameter: 'type',
   // Control family
-  control:       'control',
-  controlFlow:   'control',
+  control: 'control',
+  controlFlow: 'control',
   controlImport: 'control',
   // Tag family
-  tag:           'tag',
-  tagPunctuation:'tag',
+  tag: 'tag',
+  tagPunctuation: 'tag',
   // Punctuation family
-  punctuation:       'punctuation',
-  punctuationQuote:  'punctuation',
-  punctuationBrace:  'punctuation',
-  punctuationComma:  'punctuation',
+  punctuation: 'punctuation',
+  punctuationQuote: 'punctuation',
+  punctuationBrace: 'punctuation',
+  punctuationComma: 'punctuation',
   // Storage — AC2 hue in RLabs (shares with modifier in some modes)
-  storage:  'storage',
+  storage: 'storage',
   modifier: 'storage',
   // Independent roles (keyword, operator, class, constant, etc. each get their own hue)
 };
@@ -180,7 +193,7 @@ export function buildSyntaxRoles(): RoleDefinition[] {
       return {
         name,
         priority: 40,
-        dark:  { l: [0, 1.0], c: [0, 0.10] },
+        dark: { l: [0, 1.0], c: [0, 0.10] },
         light: { l: [0, 1.0], c: [0, 0.10] },
         // comment has no hueGroup — it's intentionally achromatic, hue doesn't matter
       };
@@ -189,7 +202,7 @@ export function buildSyntaxRoles(): RoleDefinition[] {
     return {
       name,
       priority: 40,
-      dark:  { l: [0, 1.0], c: [0, 0.40] },
+      dark: { l: [0, 1.0], c: [0, 0.40] },
       light: { l: [0, 1.0], c: [0, 0.40] },
       ...(hueGroup ? { hueGroup } : {}),
     };
@@ -202,8 +215,8 @@ export function buildAnsiRolesFree(): RoleDefinition[] {
   return names.map((name) => ({
     name,
     priority: 45,
-    dark:  { l: [0, 1.0], c: [0, 0.40] },
-    light: { l: [0, 1.0], c: [0, 0.40] },
+    dark: { l: [0, 0.65], c: [0.05, 0.40] },
+    light: { l: [0, 0.65], c: [0.05, 0.40] },
   }));
 }
 
@@ -213,23 +226,25 @@ export function buildAnsiRolesConstrained(): RoleDefinition[] {
   return names.map((name) => {
     const hueRange = ANSI_HUE_RANGES[name];
     if (name === 'ansiBlack') {
+      // Visible gray — any hue, low chroma, low lightness
       return {
         name, priority: 45,
-        dark:  { l: [0.05, 0.15], c: [0, 0.05] },
-        light: { l: [0, 0.10], c: [0, 0.05] },
+        dark: { l: [0.10, 0.30], c: [0, 0.03] },
+        light: { l: [0.05, 0.25], c: [0, 0.03] },
       };
     }
     if (name === 'ansiWhite') {
+      // Luminous near-white — any hue, very low chroma
       return {
         name, priority: 45,
-        dark:  { l: [0.85, 1.0], c: [0, 0.10] },
-        light: { l: [0.85, 0.95], c: [0, 0.10] },
+        dark: { l: [0.85, 1.0], c: [0, 0.05] },
+        light: { l: [0.82, 0.98], c: [0, 0.05] },
       };
     }
     return {
       name, priority: 45,
-      dark:  { l: [0, 1.0], c: [0.10, 0.40], h: hueRange ?? undefined },
-      light: { l: [0, 1.0], c: [0.10, 0.40], h: hueRange ?? undefined },
+      dark: { l: [0, 0.65], c: [0.05, 0.40], h: hueRange ?? undefined },
+      light: { l: [0, 0.65], c: [0.05, 0.40], h: hueRange ?? undefined },
     };
   });
 }

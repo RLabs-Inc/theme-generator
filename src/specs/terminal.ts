@@ -21,7 +21,7 @@ const ANSI_BASE_NAMES = [
 const CURSOR_ROLE: RoleDefinition = {
   name: 'cursor',
   priority: 68, // Between ac1 (70) and ac2 (65)
-  dark:  { l: [0, 1.0], c: [0, 0.40] },
+  dark: { l: [0, 1.0], c: [0, 0.40] },
   light: { l: [0, 1.0], c: [0, 0.40] },
 };
 
@@ -42,9 +42,9 @@ const CURSOR_ROLE: RoleDefinition = {
  * No syntax or comment roles — terminals don't display code tokens.
  */
 export function createTerminalSpec(options?: TerminalSpecOptions): ThemeSpec {
-  const ansiMode     = options?.ansiMode      ?? 'free';
-  const contrastFg   = options?.contrastFg    ?? 7.5;
-  const contrastAnsi = options?.contrastAnsi  ?? 4.5;
+  const ansiMode = options?.ansiMode ?? 'free';
+  const contrastFg = options?.contrastFg ?? 7.5;
+  const contrastAnsi = options?.contrastAnsi ?? 4.5;
   const contrastCursor = options?.contrastCursor ?? 5.5;
 
   // ── Roles ────────────────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ export function createTerminalSpec(options?: TerminalSpecOptions): ThemeSpec {
   // Bright ANSI: each base ANSI lightened by +0.10L (standard terminal convention)
   const brightAnsiDerived: DerivedDefinition[] = ANSI_BASE_NAMES.map((name) => ({
     name: name.replace('ansi', 'ansiBright'),
-    transform: { type: 'adjustLightness' as const, source: name, delta: 0.10 },
+    transform: { type: 'adjustLightness' as const, source: name, delta: 0.25 },
   }));
 
   const derived: DerivedDefinition[] = [
@@ -90,8 +90,8 @@ export function createTerminalSpec(options?: TerminalSpecOptions): ThemeSpec {
     // Cursor must be clearly visible against background
     { role: 'cursor', against: 'bg1', min: contrastCursor },
     // Status colors
-    { role: 'info',    against: 'bg1', min: 4.5 },
-    { role: 'error',   against: 'bg1', min: 4.5 },
+    { role: 'info', against: 'bg1', min: 4.5 },
+    { role: 'error', against: 'bg1', min: 4.5 },
     { role: 'warning', against: 'bg1', min: 4.5 },
     { role: 'success', against: 'bg1', min: 4.5 },
     // ANSI base colors
