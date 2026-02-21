@@ -648,7 +648,7 @@ async function main() {
   const patternChoice = await p.autocomplete({
     message: 'Choose a sacred geometry pattern',
     options: patternOptions,
-    placeholder: 'Type to search 101 patterns...',
+    placeholder: 'Type to search 256 patterns...',
     maxItems: 10,
   });
 
