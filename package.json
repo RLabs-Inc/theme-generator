@@ -28,7 +28,8 @@
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "cli": "bun run src/cli.ts"
+    "cli": "bun run src/cli.ts",
+    "prepublishOnly": "bun run build"
   },
   "peerDependencies": {
     "@rlabs-inc/color-generator": ">=0.1.0",
@@ -41,26 +42,35 @@
     "typescript": "^5.4.0"
   },
   "keywords": [
-    "color",
     "theme",
+    "theme-generator",
+    "color-theme",
     "sacred-geometry",
     "oklch",
-    "vscode",
-    "zed",
-    "ghostty",
-    "warp",
-    "wezterm",
-    "helix",
-    "vim",
-    "neovim",
-    "shadcn",
-    "tailwind"
+    "vscode-theme",
+    "zed-theme",
+    "ghostty-theme",
+    "warp-theme",
+    "wezterm-theme",
+    "helix-theme",
+    "vim-colorscheme",
+    "neovim-colorscheme",
+    "shadcn-ui",
+    "tailwind-colors",
+    "terminal-theme",
+    "syntax-highlighting",
+    "color-scheme",
+    "dark-theme",
+    "light-theme",
+    "wcag",
+    "accessibility",
+    "ansi-colors"
   ],
   "author": "RLabs Inc",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/RLabs-Inc/color-generator"
+    "url": "https://github.com/RLabs-Inc/theme-generator"
   },
   "dependencies": {
     "@clack/prompts": "^1.0.1",
