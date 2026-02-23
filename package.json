@@ -36,7 +36,7 @@
     "culori": "^4.0.2"
   },
   "devDependencies": {
-    "@rlabs-inc/color-generator": "workspace:*",
+    "@rlabs-inc/color-generator": ">=0.1.0",
     "@types/culori": "^4.0.1",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0"
@@ -68,6 +68,9 @@
   ],
   "author": "RLabs Inc",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/RLabs-Inc/theme-generator"
