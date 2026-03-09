@@ -19,6 +19,6 @@ export default defineConfig([
     target: 'es2022',
     sourcemap: false,
     splitting: false,
-    banner: { js: '#!/usr/bin/env node' },
+    banner: { js: '#!/usr/bin/env bun' },
   },
 ]);

@@ -507,7 +507,9 @@ const TARGETS: Target[] = [
     createSpec: (opts) => createTerminalSpec(opts),
     exporter: exportWarp,
     extension: '.yaml',
-    defaultDir: () => join(HOME, '.warp', 'themes'),
+    defaultDir: () => IS_MAC
+      ? join(HOME, '.warp', 'themes')
+      : join(HOME, '.local', 'share', 'warp-terminal', 'themes'),
   },
   {
     name: 'ghostty',
@@ -536,9 +538,7 @@ const TARGETS: Target[] = [
     createSpec: (opts) => createVSCodeSpec(opts),
     exporter: exportVSCode,
     extension: '.json',
-    defaultDir: () => IS_MAC
-      ? join(HOME, '.vscode', 'extensions', 'sacred-colors', 'themes')
-      : join(HOME, '.vscode', 'extensions', 'sacred-colors', 'themes'),
+    defaultDir: () => join(HOME, '.vscode', 'extensions', 'sacred-colors', 'themes'),
   },
   {
     name: 'zed',
