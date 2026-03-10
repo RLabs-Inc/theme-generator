@@ -1,6 +1,6 @@
 {
   "name": "@rlabs-inc/theme-generator",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Transform 3D OKLCH color clouds into complete themes for 10 targets via constraint-based extraction",
   "type": "module",
   "main": "./dist/index.cjs",

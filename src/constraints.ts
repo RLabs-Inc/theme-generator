@@ -47,17 +47,17 @@ export const UI_ROLES: RoleDefinition[] = [
     name: 'bg1', priority: 100,
     // RLabs uses [0, 17%] dark / [93, 100%] light — allows darker backgrounds
     dark: { l: [0, 0.17], c: [0, 0.04] },
-    light: { l: [0.93, 1.0], c: [0, 0.04] },
+    light: { l: [0.95, 1.0], c: [0, 0.04] },
   },
   {
     name: 'bg2', priority: 95,
     dark: { l: [0, 0.25], c: [0, 0.05] },
-    light: { l: [0.88, 1.0], c: [0, 0.05] },
+    light: { l: [0.90, 1.0], c: [0, 0.05] },
   },
   {
     name: 'bg3', priority: 90,
     dark: { l: [0, 0.30], c: [0, 0.03] },
-    light: { l: [0.90, 1.0], c: [0, 0.03] },
+    light: { l: [0.92, 1.0], c: [0, 0.03] },
   },
   {
     name: 'fg1', priority: 98,
